@@ -14,23 +14,23 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bno;
-
-    private String title;
-
-    private String content;
-
-    private String writer;
 
     @Column(name = "created_at")
     @Builder.Default
@@ -40,12 +40,25 @@ public class Board {
     @Builder.Default
     private LocalDateTime modifyAt = LocalDateTime.now();
 
+    private String title;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    private String writer;
+
     @Column(name = "is_del")
     @Builder.Default
     private boolean isDel = false;
 
     @ElementCollection
-    @CollectionTable(name = "upload_images", joinColumns = @JoinColumn(name = "bno"))
-    private List<UploadFile> files = new ArrayList<>();
+    @CollectionTable(name = "upload_image", joinColumns = @JoinColumn(name = "bno"))
+    @Builder.Default
+    List<UploadFile> files = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
 }

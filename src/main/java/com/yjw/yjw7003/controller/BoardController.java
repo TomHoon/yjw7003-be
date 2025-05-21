@@ -1,5 +1,7 @@
 package com.yjw.yjw7003.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,10 +16,15 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/board")
+@RequestMapping("/api/v1/board")
 public class BoardController {
 
     private final BoardService boardService;
+
+    @GetMapping("/list")
+    public List<BoardDTO> 게시글리스트조회() {
+        return boardService.게시글리스트조회();
+    }
 
     @GetMapping("/detail/{bno}")
     public BoardDTO 게시글상세조회(@PathVariable(name = "bno") Long bno) {
