@@ -8,4 +8,5 @@ import com.yjw.yjw7003.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
   Optional<Member> findByMemberId(String memberId);
+  boolean existsByMemberId(String memberId);
 }

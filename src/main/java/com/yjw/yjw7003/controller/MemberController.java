@@ -1,6 +1,10 @@
 package com.yjw.yjw7003.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,4 +51,18 @@ public class MemberController {
 
   }
 
+  @PostMapping("/join")
+  public ResponseEntity<String> join(@RequestBody MemberDTO dto) {
+    try{
+     memberService.회원가입(dto);
+     return ResponseEntity.ok("회원가입 성공");
+    }catch (RuntimeException   e) {
+      return ResponseEntity.badRequest().body("이미 가입된 아이디입니다.");
+    }
+  }
+
+  @GetMapping("/list")
+  public List<MemberDTO> 회원목록조회() {
+    return memberService.전체회원조회();
+  }
 }

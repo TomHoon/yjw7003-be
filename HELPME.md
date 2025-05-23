@@ -5,5 +5,3 @@
   - @CrossOrigin은 credential까지 허용하지 못함
   - 쿠키 주입시 Secure, SameSite, 는 credential 처리만 되어 있으면 잘 됨
     - Secure: true, SameStie: None 처리
-
-확인이요

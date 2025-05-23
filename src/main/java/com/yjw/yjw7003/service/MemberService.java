@@ -1,6 +1,9 @@
 package com.yjw.yjw7003.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -29,4 +32,34 @@ public class MemberService {
       return false;
     }
   }
+
+  public Boolean 회원가입(MemberDTO dto) {
+
+    if(memberRepository.existsByMemberId(dto.getMemberId())) {
+    throw new RuntimeException("이미 가입된 아이디입니다.");
+    }
+      Member member = Member.builder()
+      .memberId(dto.getMemberId())
+      .memberPw(dto.getMemberPw())
+      .memberNickname(dto.getMemberNickname())
+      .build();
+
+  memberRepository.save(member);
+  return true;
+  }
+
+  public List<MemberDTO> 전체회원조회() {
+    List<Member> members = memberRepository.findAll();
+    return members.stream()
+      .map(m -> MemberDTO.builder()
+      .mno(m.getMno())
+      .memberId(m.getMemberId())
+      .memberPw(m.getMemberPw())
+      .memberDegree(m.getMemberDegree())
+      .memberNickname(m.getMemberNickname())
+      .memberIsSocial(m.getMemberIsSocial())
+      .build())
+
+      .collect(Collectors.toList());
+     }
 }
