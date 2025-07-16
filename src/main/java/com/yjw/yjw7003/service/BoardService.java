@@ -1,23 +1,20 @@
 package com.yjw.yjw7003.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.yjw.yjw7003.dto.BoardDTO;
+import com.yjw.yjw7003.dto.PageRequestDTO;
+import com.yjw.yjw7003.dto.PageResponseDTO;
 import com.yjw.yjw7003.entity.Board;
 import com.yjw.yjw7003.entity.Member;
 import com.yjw.yjw7003.repository.BoardRepository;
 import com.yjw.yjw7003.repository.MemberRepository;
-import com.yjw.yjw7003.utils.UploadFile;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +25,40 @@ public class BoardService {
 
   private final BoardRepository boardRepository;
   private final MemberRepository memberRepository;
-  private final String uploadDir = "uploads";
 
-  public List<BoardDTO> 게시글리스트조회() {
-    List<BoardDTO> list = boardRepository.findAll().stream().map(BoardDTO::new).collect(Collectors.toList());
-    return list;
+  public PageResponseDTO<BoardDTO> 게시글리스트조회(int page) {
+
+    // NEW VERSION >>>>
+    int size = 10;
+
+    PageRequestDTO dto = PageRequestDTO.builder()
+        .page(page)
+        .size(size)
+        .build();
+
+    Pageable pageable = dto.getPageable(Sort.by("bno"));
+    Page<BoardDTO> res = boardRepository.findAll(pageable).map(BoardDTO::new);
+
+    PageResponseDTO<BoardDTO> resDTO = new PageResponseDTO<>(res);
+
+    int currentGroup = page / size;
+    int startPage = currentGroup * size + 1;
+    int endPage = Math.min(startPage + size - 1, res.getTotalPages());
+
+    boolean hasNextGroup = endPage < res.getTotalPages();
+    boolean hasPrevGroup = startPage > 1;
+
+    resDTO.setHasNextGroup(hasNextGroup);
+    resDTO.setHasPreviousGroup(hasPrevGroup);
+    resDTO.setStartPage(startPage);
+    resDTO.setCurrentGroup(currentGroup);
+
+    return resDTO;
+
+    // OLD VERSION >>>>
+    // List<BoardDTO> list =
+    // boardRepository.findAll().stream().map(BoardDTO::new).collect(Collectors.toList());
+    // return list;
   }
 
   public BoardDTO 게시글상세조회(Long bno) {
@@ -47,6 +73,7 @@ public class BoardService {
         .writer(board.getWriter())
         .isDel(board.isDel())
         .createdAt(board.getCreatedAt())
+        .fileUploadList(board.getFiles())
         .modifyAt(board.getModifyAt())
         .build();
 
@@ -61,66 +88,23 @@ public class BoardService {
    */
   public BoardDTO 게시글등록(BoardDTO param) {
 
-    List<MultipartFile> list = param.getFiles(); // 사용자가 보낸 이미지 리스트
-    List<UploadFile> uploadList = new ArrayList<>(); // Embeded Table에 들어갈 녀석들
+    // New Version >>>>
 
-    if (list != null && list.size() != 0) {
+    // Board 엔티티의 Member를 가져옴
+    String memberId = param.getWriter();
+    Member m = memberRepository.findByMemberId(memberId).orElseThrow();
 
-      for (MultipartFile m : list) {
-        String originName = m.getOriginalFilename(); // 요청보낸 파일에서 파일명 뽑기
-        String newFileName = UUID.randomUUID() + "_" + originName; // 새로운 파일명으로 수정한다.
-
-        try {
-          Path uploadPath = Paths.get(uploadDir);
-
-          if (!Files.exists(uploadPath)) { // 디렉토리 없는 경우 생성
-
-            Files.createDirectories(uploadPath);
-
-          } else {
-
-            Path filePath = uploadPath.resolve(newFileName); // Path 자체는 파일까지 Path로 처리
-            Files.copy(m.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            UploadFile file = UploadFile.builder()
-                .fileName(newFileName)
-                .filePath(uploadPath.toString())
-                .size(m.getSize())
-                .build();
-
-            uploadList.add(file);
-
-          }
-
-        } catch (Exception e) {
-
-          System.out.println(e);
-
-        }
-
-      }
-    }
-
-    // Board에 넣기 위한
-    // 게시글 작성 회원 엔티티 조회
-    Member member = memberRepository.findById(param.getMno()).orElseThrow();
-
-    Board board = Board.builder()
+    // 멤버, ElementCollection 모두 결합하여 저장
+    Board b = Board.builder()
         .title(param.getTitle())
         .content(param.getContent())
-        .writer(param.getWriter())
-        .files(uploadList)
-        .member(member)
+        .files(param.getFileUploadList())
+        .member(m)
         .build();
 
-    Board result = boardRepository.save(board); // Board 테이블에 Insert
+    Board resultBoard = boardRepository.save(b);
 
-    param.setBno(result.getBno());
-    param.setFileNames(uploadList.stream().map(UploadFile::getFilePath).collect(Collectors.toList()));
-    param.setCreatedAt(result.getCreatedAt());
-    param.setModifyAt(result.getModifyAt());
-
-    return param;
+    return new BoardDTO(resultBoard);
   }
 
 }

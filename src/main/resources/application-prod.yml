@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: project
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://tomhoon.duckdns.org:33306/yjw7003
+    username: root
+    password: 2846
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-request-size: 30MB
+      max-file-size: 10MB
+
+server:
+  port: 22000
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+com:
+  yjw:
+    upload:
+      path: upload
+      filepath: fileupload

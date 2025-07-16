@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.yjw.yjw7003.utils.UploadFile;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,39 +29,40 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(value = { AuditingEntityListener.class })
 public class Board {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bno;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long bno;
 
-    @Column(name = "created_at")
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+  @Column(name = "created_at")
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "modify_at")
-    @Builder.Default
-    private LocalDateTime modifyAt = LocalDateTime.now();
+  @Column(name = "modify_at")
+  @Builder.Default
+  private LocalDateTime modifyAt = LocalDateTime.now();
 
-    private String title;
+  private String title;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String content;
+  @Lob
+  @Column(columnDefinition = "TEXT")
+  private String content;
 
-    private String writer;
+  private String writer;
 
-    @Column(name = "is_del")
-    @Builder.Default
-    private boolean isDel = false;
+  @Column(name = "is_del")
+  @Builder.Default
+  private boolean isDel = false;
 
-    @ElementCollection
-    @CollectionTable(name = "upload_image", joinColumns = @JoinColumn(name = "bno"))
-    @Builder.Default
-    List<UploadFile> files = new ArrayList<>();
+  @ElementCollection
+  @CollectionTable(name = "upload_image", joinColumns = @JoinColumn(name = "bno"))
+  @Builder.Default
+  List<UploadFile> files = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 
 }

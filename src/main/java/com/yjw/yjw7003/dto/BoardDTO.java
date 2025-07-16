@@ -4,10 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yjw.yjw7003.entity.Board;
+import com.yjw.yjw7003.utils.UploadFile;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,13 +25,13 @@ public class BoardDTO {
   public Boolean isDel;
   public LocalDateTime createdAt;
   public LocalDateTime modifyAt;
+  public MemberDTO memberDTO;
+
+  @Builder.Default
+  public List<UploadFile> fileUploadList = new ArrayList<>();
 
   @Builder.Default
   public List<String> fileNames = new ArrayList<>();
-
-  @Builder.Default
-  @JsonIgnore
-  public List<MultipartFile> files = new ArrayList<>();
 
   public BoardDTO(Board board) {
     this.bno = board.getBno();

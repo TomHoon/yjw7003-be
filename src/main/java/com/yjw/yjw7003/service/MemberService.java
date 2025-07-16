@@ -35,31 +35,36 @@ public class MemberService {
 
   public Boolean 회원가입(MemberDTO dto) {
 
-    if(memberRepository.existsByMemberId(dto.getMemberId())) {
-    throw new RuntimeException("이미 가입된 아이디입니다.");
+    if (memberRepository.existsByMemberId(dto.getMemberId())) {
+      throw new RuntimeException("이미 가입된 아이디입니다.");
     }
-      Member member = Member.builder()
-      .memberId(dto.getMemberId())
-      .memberPw(dto.getMemberPw())
-      .memberNickname(dto.getMemberNickname())
-      .build();
+    Member member = Member.builder()
+        .memberId(dto.getMemberId())
+        .memberPw(dto.getMemberPw())
+        .memberNickname(dto.getMemberNickname())
+        .build();
 
-  memberRepository.save(member);
-  return true;
+    memberRepository.save(member);
+    return true;
   }
 
   public List<MemberDTO> 전체회원조회() {
     List<Member> members = memberRepository.findAll();
     return members.stream()
-      .map(m -> MemberDTO.builder()
-      .mno(m.getMno())
-      .memberId(m.getMemberId())
-      .memberPw(m.getMemberPw())
-      .memberDegree(m.getMemberDegree())
-      .memberNickname(m.getMemberNickname())
-      .memberIsSocial(m.getMemberIsSocial())
-      .build())
+        .map(m -> MemberDTO.builder()
+            .mno(m.getMno())
+            .memberId(m.getMemberId())
+            .memberPw(m.getMemberPw())
+            .memberDegree(m.getMemberDegree())
+            .memberNickname(m.getMemberNickname())
+            .memberIsSocial(m.getMemberIsSocial())
+            .build())
 
-      .collect(Collectors.toList());
-     }
+        .collect(Collectors.toList());
+  }
+
+  public MemberDTO 회원찾기byMemberId(String memberId) {
+    Member e = memberRepository.findByMemberId(memberId).orElseThrow();
+    return new MemberDTO(e);
+  }
 }
