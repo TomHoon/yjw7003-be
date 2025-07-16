@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://tomhoon.duckdns.org:33306/yjw7003
+    url: jdbc:mariadb://172.19.0.2:3306/yjw7003
     username: root
     password: 2846
 
@@ -22,7 +22,7 @@ spring:
       max-file-size: 10MB
 
 server:
-  port: 22000
+  port: 30000
   servlet:
     encoding:
       charset: UTF-8
