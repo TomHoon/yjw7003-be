@@ -10,9 +10,11 @@
 - ex) docker build -t yjw-boot-image .
 
 ### docker 실행
+> 바인딩시 플젝 기준에서 실행해야 uploads 디렉토리 바인딩됨
 
 - docker run -d -p 30000:30000 --name [컨테이너명] [이미지명]
 - ex) docker run -d -p 30000:30000 --network chatting-network --name yjw-container yjw-boot-image
+- [upload바인딩]ex) docker run -d -v $(pwd)/uploads:/app/uploads -p 30000:30000 --network chatting-network --name yjw-container yjw-boot-image
 
 ### mariadb ip가 도커 내부 Ip인 이유
 - 포트포워딩을 하더라도 spring에서 도메인으로 연결시 db 연결이 안됨
