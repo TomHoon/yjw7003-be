@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,10 +54,10 @@ public class MemberController {
 
   @PostMapping("/join")
   public ResponseEntity<String> join(@RequestBody MemberDTO dto) {
-    try{
-     memberService.회원가입(dto);
-     return ResponseEntity.ok("회원가입 성공");
-    }catch (RuntimeException   e) {
+    try {
+      memberService.회원가입(dto);
+      return ResponseEntity.ok("회원가입 성공");
+    } catch (RuntimeException e) {
       return ResponseEntity.badRequest().body("이미 가입된 아이디입니다.");
     }
   }

@@ -31,78 +31,78 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/board")
 public class BoardController {
 
-    private final BoardService boardService;
+  private final BoardService boardService;
 
-    private final FileUtil fileUtil;
+  private final FileUtil fileUtil;
 
-    private static final String UPLOAD_DIR = "uploads/";
+  private static final String UPLOAD_DIR = "uploads/";
 
-    @PostConstruct
-    public void init() {
-        File directory = new File(UPLOAD_DIR);
-        if (!directory.exists()) {
-            boolean created = directory.mkdirs();
-            if (created) {
-            } else {
-            }
-        } else {
-        }
+  @PostConstruct
+  public void init() {
+    File directory = new File(UPLOAD_DIR);
+    if (!directory.exists()) {
+      boolean created = directory.mkdirs();
+      if (created) {
+      } else {
+      }
+    } else {
+    }
+  }
+
+  @GetMapping("/list")
+  public ResponseEntity<ApiResponse<PageResponseDTO<BoardDTO>>> 게시글리스트조회(@RequestParam Map<String, String> param) {
+    int page = Integer.parseInt(param.get("page"));
+
+    PageResponseDTO<BoardDTO> resDTO = boardService.게시글리스트조회(page);
+    return ResponseEntity.ok(ApiResponse.success(resDTO));
+  }
+
+  @GetMapping("/detail/{bno}")
+  public ResponseEntity<ApiResponse<BoardDTO>> 게시글상세조회(@PathVariable(name = "bno") Long bno) {
+
+    BoardDTO dto = boardService.게시글상세조회(bno);
+
+    return ResponseEntity.ok(ApiResponse.success(dto));
+  }
+
+  @PostMapping("/regist")
+  public ResponseEntity<ApiResponse<BoardDTO>> 게시글등록(@RequestPart("board") BoardDTO param,
+      @RequestPart(value = "attachList", required = false) List<MultipartFile> attachList) {
+
+    List<UploadFile> fileList = new ArrayList<>();
+
+    // 파일 존재시 서버에 저장
+    // 엔티티형태로 리스트에 다시 담기
+    if (attachList != null && attachList.size() > 0) {
+      for (MultipartFile f : attachList) {
+        String 저장파일명 = fileUtil.saveFile(f);
+        String filePath = 저장파일명;
+        long size = f.getSize();
+
+        UploadFile file = UploadFile.builder()
+            .fileName(저장파일명)
+            .filePath(filePath)
+            .size(size)
+            .build();
+
+        fileList.add(file);
+
+      }
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<ApiResponse<PageResponseDTO<BoardDTO>>> 게시글리스트조회(@RequestParam Map<String, String> param) {
-        int page = Integer.parseInt(param.get("page"));
+    // 엔티티 형태 담은 리스트 넘기기 위해 파람에 넣어줌
+    param.setFileUploadList(fileList);
 
-        PageResponseDTO<BoardDTO> resDTO = boardService.게시글리스트조회(page);
-        return ResponseEntity.ok(ApiResponse.success(resDTO));
-    }
+    BoardDTO dto = boardService.게시글등록(param);
 
-    @GetMapping("/detail/{bno}")
-    public ResponseEntity<ApiResponse<BoardDTO>> 게시글상세조회(@PathVariable(name = "bno") Long bno) {
+    return ResponseEntity.ok(ApiResponse.success(dto));
+  }
 
-        BoardDTO dto = boardService.게시글상세조회(bno);
+  @PostMapping("/uploadImage")
+  public ResponseEntity<ApiResponse<Map<String, String>>> uploadImage(@RequestBody MultipartFile file) {
+    String savedPath = fileUtil.saveFile(file);
 
-        return ResponseEntity.ok(ApiResponse.success(dto));
-    }
-
-    @PostMapping("/regist")
-    public ResponseEntity<ApiResponse<BoardDTO>> 게시글등록(@RequestPart("board") BoardDTO param,
-            @RequestPart(value = "attachList", required = false) List<MultipartFile> attachList) {
-
-        List<UploadFile> fileList = new ArrayList<>();
-
-        // 파일 존재시 서버에 저장
-        // 엔티티형태로 리스트에 다시 담기
-        if (attachList != null && attachList.size() > 0) {
-            for (MultipartFile f : attachList) {
-                String 저장파일명 = fileUtil.saveFile(f);
-                String filePath = 저장파일명;
-                long size = f.getSize();
-
-                UploadFile file = UploadFile.builder()
-                        .fileName(저장파일명)
-                        .filePath(filePath)
-                        .size(size)
-                        .build();
-
-                fileList.add(file);
-
-            }
-        }
-
-        // 엔티티 형태 담은 리스트 넘기기 위해 파람에 넣어줌
-        param.setFileUploadList(fileList);
-
-        BoardDTO dto = boardService.게시글등록(param);
-
-        return ResponseEntity.ok(ApiResponse.success(dto));
-    }
-
-    @PostMapping("/uploadImage")
-    public ResponseEntity<ApiResponse<Map<String, String>>> uploadImage(@RequestBody MultipartFile file) {
-        String savedPath = fileUtil.saveFile(file);
-
-        return ResponseEntity.ok(ApiResponse.success(Map.of("imageURL", savedPath)));
-    }
+    return ResponseEntity.ok(ApiResponse.success(Map.of("imageURL", savedPath)));
+  }
 
 }
